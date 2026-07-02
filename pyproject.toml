@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bel-lat"
+version = "3.0.0"
+description = "Convert cyrillic Belarusian characters to Latin characters using transliteration. Can transliterate in accordance with the \"Instruction on transliteration of geographical names\" or in accordance with the rules of the Belarusian Latin alphabet (Łacinka)."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+  { name = "Alex Bondarev", email = "skip405@gmail.com" },
+  { name = "Kastuś Novikaŭ", email = "kastus.novikau@gmail.com" },
+]
+keywords = [
+  "transliterate",
+  "transliteration",
+  "belarusian",
+  "string",
+  "text",
+  "lacinka",
+  "latin",
+  "latinize",
+  "convert",
+  "replace",
+  "be",
+  "by",
+  "беларуская мова",
+  "лацінка",
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+service = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "pydantic>=2.0"]
+dev = ["pytest>=7.0", "httpx>=0.27"]
+
+[project.urls]
+Repository = "https://github.com/Kickoman/bel-lat"
+Changelog = "https://github.com/Kickoman/bel-lat/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bel_lat"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
