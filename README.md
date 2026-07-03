@@ -116,6 +116,25 @@ docker run --rm -p 8000:8000 bel-lat
 
 Then the service is reachable at `http://localhost:8000` as described above.
 
+### Running behind a reverse proxy on a sub-path
+
+If the service isn't served from the domain root (e.g. `example.com/bel-lat` instead of `example.com`), set the `ROOT_PATH` environment variable to that prefix. This tells FastAPI to generate `/docs`, `/redoc` and `/openapi.json` links with the prefix included, so Swagger UI resolves correctly instead of requesting them from the domain root.
+
+```shell
+docker run --rm -p 8000:8000 -e ROOT_PATH=/bel-lat bel-lat
+```
+
+Matching nginx config (strips the prefix before proxying, same as the app expects with `ROOT_PATH` set):
+
+```nginx
+location /bel-lat/ {
+        rewrite /bel-lat/(.*) /$1 break;
+        proxy_pass      http://127.0.0.1:8000;
+        proxy_redirect  off;
+        proxy_set_header Host $host;
+}
+```
+
 ## Testing
 
 ```

@@ -10,4 +10,6 @@ RUN pip install --no-cache-dir ".[service]"
 
 EXPOSE 8000
 
-CMD ["uvicorn", "service.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENV ROOT_PATH=""
+
+CMD uvicorn service.main:app --host 0.0.0.0 --port 8000 --root-path "$ROOT_PATH"
