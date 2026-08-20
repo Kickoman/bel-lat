@@ -12,4 +12,6 @@ EXPOSE 8000
 
 ENV ROOT_PATH=""
 
-CMD uvicorn service.main:app --host 0.0.0.0 --port 8000 --root-path "$ROOT_PATH"
+# exec so uvicorn is PID 1 and receives SIGTERM from `docker stop` directly;
+# sh -c is still needed to expand $ROOT_PATH.
+CMD ["sh", "-c", "exec uvicorn service.main:app --host 0.0.0.0 --port 8000 --root-path \"$ROOT_PATH\""]

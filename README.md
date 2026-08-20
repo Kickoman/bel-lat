@@ -124,16 +124,31 @@ If the service isn't served from the domain root (e.g. `example.com/bel-lat` ins
 docker run --rm -p 8000:8000 -e ROOT_PATH=/bel-lat bel-lat
 ```
 
-Matching nginx config (strips the prefix before proxying, same as the app expects with `ROOT_PATH` set):
+Matching nginx config. The proxy strips the prefix, the app re-adds it when generating
+links — so `ROOT_PATH` and the stripping must always be configured together:
 
 ```nginx
+# /bel-lat without a trailing slash would not match the block below,
+# and would reach the app as /bel-lat -> 404. Redirect it first.
+location = /bel-lat {
+        return 301 /bel-lat/;
+}
+
 location /bel-lat/ {
-        rewrite /bel-lat/(.*) /$1 break;
-        proxy_pass      http://127.0.0.1:8000;
-        proxy_redirect  off;
-        proxy_set_header Host $host;
+        # The trailing slash on proxy_pass is what strips the prefix.
+        proxy_pass         http://127.0.0.1:8000/;
+        proxy_redirect     off;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Forwarded-Proto $scheme;
 }
 ```
+
+**N.B.** when reading uvicorn's access log, remember it prints `root_path + path`. With
+`ROOT_PATH=/bel-lat` a *successful* request to `/` is logged as `GET /bel-lat/ 200`, and a
+request that still carries the prefix shows up doubled, as `GET /bel-lat/bel-lat 404`. The
+doubling in the log is the symptom of a request that was not stripped, not of a double prefix
+being added.
 
 ## Testing
 
