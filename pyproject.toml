@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bel-lat"
-version = "3.0.0"
+version = "3.0.1"
 description = "Convert cyrillic Belarusian characters to Latin characters using transliteration. Can transliterate in accordance with the \"Instruction on transliteration of geographical names\" or in accordance with the rules of the Belarusian Latin alphabet (Łacinka)."
 readme = "README.md"
 license = "MIT"
