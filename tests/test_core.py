@@ -272,6 +272,10 @@ class TestEJoJuJaRenderWithJ:
         assert translate("ьЮА") == "JUA"
         assert translate("ьЯА") == "JAA"
 
+    def test_after_symbols(self):
+        assert translate("/ёсьць") == "/jość"
+        assert translate("\"ёлачка\"") == "\"jołačka\""
+
 
 class TestEJoJuJaRenderWithIAfterConsonants:
     def test_lowercase(self):

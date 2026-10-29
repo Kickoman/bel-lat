@@ -130,8 +130,8 @@ def translate(text, style="lacinka", custom_replacements=None):
                 result_for_word.append(char)
                 continue
 
-            next_char = word[i + 1] if i + 1 < len(word) else ""
-            prev_char = word[i - 1] if i > 0 else ""
+            next_char = word[i + 1] if i + 1 < len(word) and word[i + 1] in replacements else ""
+            prev_char = word[i - 1] if i > 0 and word[i - 1] in replacements else ""
 
             result_for_word.append(_process_char(char, next_char, prev_char, style, replacement))
 
