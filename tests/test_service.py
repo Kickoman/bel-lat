@@ -34,6 +34,15 @@ def test_translate_custom_replacements():
     assert response.json() == {"result": "#"}
 
 
+def test_translate_single_value_custom_replacement_after_symbol():
+    response = client.post(
+        "/translate",
+        json={"text": "(е)", "custom_replacements": [["е", ["e"]]]},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"result": "(e)"}
+
+
 def test_translate_invalid_style_returns_422():
     response = client.post(
         "/translate", json={"text": "прывітанне", "style": "invalid-style"}

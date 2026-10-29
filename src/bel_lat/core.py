@@ -34,19 +34,72 @@ _BASE_REPLACEMENTS = (
     ("я", ["ia", "ja", "a"]),
     ("’", "_omitted"),
     ("‘", "_omitted"),
+    ("'", "_omitted"),
+    ("ʼ", "_omitted"),
 )
 
 _SPECIAL_CASES = {"е", "ё", "ж", "з", "л", "н", "с", "ў", "ц", "ч", "ш", "ю", "я"}
 
 
-def _process_return_value(value, char, next_char, style):
-    if char == char.upper() and char != char.lower():
-        if next_char != "" and next_char == next_char.upper():
-            return value.upper()
+def _is_cased(char):
+    return char.lower() != char.upper()
 
-        return value[0].upper() + value[1:]
 
-    return value
+def _is_caps_word(word):
+    cased = [c for c in word if _is_cased(c)]
+
+    if len(cased) < 2:
+        return None
+
+    return all(c.isupper() for c in cased)
+
+
+def _caps_context(words):
+    # A lone capital letter takes its case from the nearest word with 2+ cased letters, preferring the next one
+    caps = [_is_caps_word(word) for word in words]
+    next_caps = [None] * len(words)
+    nearest = None
+
+    for k in range(len(words) - 1, -1, -1):
+        next_caps[k] = nearest
+
+        if caps[k] is not None:
+            nearest = caps[k]
+
+    context = []
+    nearest = None
+
+    for k in range(len(words)):
+        context.append(next_caps[k] if next_caps[k] is not None else bool(nearest))
+
+        if caps[k] is not None:
+            nearest = caps[k]
+
+    return context
+
+
+def _is_caps(word, i, context_caps):
+    for j in range(i + 1, len(word)):
+        if _is_cased(word[j]):
+            return word[j].isupper()
+
+    for j in range(i - 1, -1, -1):
+        if _is_cased(word[j]):
+            return word[j].isupper()
+
+    return context_caps
+
+
+def _apply_case(value, word, i, context_caps):
+    char = word[i]
+
+    if not value or not (char.isupper() and _is_cased(char)):
+        return value
+
+    if len(value) > 1 and _is_caps(word, i, context_caps):
+        return value.upper()
+
+    return value[0].upper() + value[1:]
 
 
 def _process_special_case(char, next_char, prev_char, style, replacement):
@@ -72,7 +125,7 @@ def _process_special_case(char, next_char, prev_char, style, replacement):
             else:
                 index = 1
     elif lower in ("е", "ё", "ю", "я"):
-        if prev_lower in ("а", "і", "о", "у", "ы", "ў", "э", "ь", "’", "‘") or prev_char == "":
+        if prev_lower in ("а", "і", "о", "у", "ы", "ў", "э", "ь", "’", "‘", "ʼ") or not prev_char.isalpha():
             index = 1
         elif prev_lower == "л" and style == "lacinka":
             index = 2
@@ -87,7 +140,7 @@ def _process_special_case(char, next_char, prev_char, style, replacement):
         if style == "geo-2023":
             index = 2
 
-    return _process_return_value(replacement[index], char, next_char, style)
+    return replacement[index] if index < len(replacement) else replacement[0]
 
 
 def _process_char(char, next_char, prev_char, style, replacement):
@@ -102,7 +155,7 @@ def _process_char(char, next_char, prev_char, style, replacement):
     if style == "geo-2023" and len(replacement) > 1 and replacement[1]:
         replacement_value = replacement[1]
 
-    return _process_return_value(replacement_value, char, next_char, style)
+    return replacement_value
 
 
 def translate(text, style="lacinka", custom_replacements=None):
@@ -114,9 +167,11 @@ def translate(text, style="lacinka", custom_replacements=None):
     replacements = dict(_BASE_REPLACEMENTS)
     replacements.update(custom_replacements)
 
+    source_words = text.split(" ")
+    caps_context = _caps_context(source_words)
     words = []
 
-    for word in text.split(" "):
+    for w, word in enumerate(source_words):
         if word == "":
             words.append("")
             continue
@@ -133,7 +188,8 @@ def translate(text, style="lacinka", custom_replacements=None):
             next_char = word[i + 1] if i + 1 < len(word) else ""
             prev_char = word[i - 1] if i > 0 else ""
 
-            result_for_word.append(_process_char(char, next_char, prev_char, style, replacement))
+            value = _process_char(char, next_char, prev_char, style, replacement)
+            result_for_word.append(_apply_case(value, word, i, caps_context[w]))
 
         words.append("".join(result_for_word))
 
