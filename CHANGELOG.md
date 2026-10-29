@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- The ASCII apostrophe `'` and the modifier letter apostrophe `ʼ` are omitted like `’` and `‘`, and `е`, `ё`, `ю`, `я` after them render with `j` (`сям'я` → `siamja`).
+
+### Fixed
+
+- `е`, `ё`, `ю`, `я` after punctuation and other non-letters render with `j` as at the start of a word (`/ёсьць` → `/jość`).
+- Multi-letter replacements keep upper case at the end of an ALL-CAPS word and before punctuation, hyphens and stress marks (`ЖЫВЕ!` → `ŽYVIE!`, `МЕ́СЦА` → `MIÉSCA`).
+- A capital letter followed by punctuation or a stress mark is no longer treated as ALL-CAPS (`Я, як і ты` → `Ja, jak i ty`).
+- A lone capital letter takes its case from the neighbouring words (`Я ІДУ` → `JA IDU`, `Я іду` → `Ja idu`).
+- Custom replacements with a single value for `е`, `ё`, `ю`, `я` and other context-dependent letters no longer raise `IndexError`.
+
 ## v3.0.0 - 2026-07-02
 
 ### Changed

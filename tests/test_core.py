@@ -352,6 +352,21 @@ class TestCapslockWordEnding:
         assert translate("ЯX") == "JAX"
 
 
+class TestCapitalLetterContext:
+    def test_lone_letter_in_lowercase_text(self):
+        assert translate("Я іду") == "Ja idu"
+        assert translate("Я, як і ты") == "Ja, jak i ty"
+
+    def test_lone_letter_in_capslock_text(self):
+        assert translate("Я ІДУ") == "JA IDU"
+        assert translate("Я З ТАБОЙ") == "JA Z TABOJ"
+        assert translate("ЁН СКАЗАЎ: Я") == "JON SKAZAŬ: JA"
+
+    def test_uppercase_before_combining_acute_accent(self):
+        assert translate("Я́ня") == "Jánia"
+        assert translate("Ю́ля") == "Júla"
+
+
 class TestZNSC:
     def test_render_without_acute_accent(self):
         assert translate("з") == "z"
