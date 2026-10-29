@@ -276,6 +276,25 @@ class TestEJoJuJaRenderWithJ:
         assert translate("/ёсьць") == "/jość"
         assert translate("\"ёлачка\"") == "\"jołačka\""
 
+    def test_after_symbols_uppercase(self):
+        assert translate("/Ёлка") == "/Jołka"
+        assert translate("«Ёлка»") == "«Jołka»"
+
+    def test_after_symbols_capslock(self):
+        assert translate("«ЁЛКА»") == "«JOŁKA»"
+
+    def test_after_custom_replaced_symbols(self):
+        assert translate("«ёлка»", custom_replacements=[("«", ['"']), ("»", ['"'])]) == '"jołka"'
+        assert translate("№ёлка", custom_replacements=[("№", ["#"])]) == "#jołka"
+        assert translate("сям'я", custom_replacements=[("'", "_omitted")]) == "siamja"
+
+    def test_after_ascii_and_modifier_letter_apostrophes(self):
+        assert translate("сям'я") == "siamja"
+        assert translate("сямʼя") == "siamja"
+
+        assert translate("аб'ява") == "abjava"
+        assert translate("абʼява") == "abjava"
+
 
 class TestEJoJuJaRenderWithIAfterConsonants:
     def test_lowercase(self):
@@ -296,9 +315,41 @@ class TestEJoJuJaRenderWithIAfterConsonants:
         assert translate("бЮБ") == "bIUB"
         assert translate("бЯВ") == "bIAV"
 
+    def test_after_latin_consonants(self):
+        # "H" and "c" here are Latin look-alikes, not Cyrillic "Н" and "с"
+        assert translate("Hеба") == "Hieba"
+        assert translate("cёння") == "cionnia"
+
 
 def test_h_renders_as_ch_on_capslock():
     assert translate("ХА") == "CHA"
+
+
+class TestCapslockWordEnding:
+    def test_at_end_of_word(self):
+        assert translate("ЖЫВЕ") == "ŽYVIE"
+        assert translate("МАЮ") == "MAJU"
+        assert translate("ЖЫВЕ БЕЛАРУСЬ") == "ŽYVIE BIEŁARUŚ"
+
+        assert translate("ЖЖ", style="geo-2023") == "ZHZH"
+
+    def test_before_punctuation(self):
+        assert translate("ЖЫВЕ!") == "ŽYVIE!"
+        assert translate("МАЮ,") == "MAJU,"
+        assert translate("СТРАХ!") == "STRACH!"
+
+        assert translate("ЖЫЦЦЁ!", style="geo-2023") == "ZHYCCIO!"
+        assert translate("ЖЖ.", style="geo-2023") == "ZHZH."
+
+    def test_before_hyphen(self):
+        assert translate("СІНЕ-ЗЯЛЁНЫ") == "SINIE-ZIALONY"
+
+    def test_before_combining_acute_accent(self):
+        assert translate("МЕ́СЦА") == "MIÉSCA"
+
+    def test_before_latin_letters(self):
+        # "X" here is Latin
+        assert translate("ЯX") == "JAX"
 
 
 class TestZNSC:
@@ -387,3 +438,9 @@ class TestMisc:
 
     def test_allows_basic_custom_removals(self):
         assert translate("абв", custom_replacements=[("б", "_omitted")]) == "av"
+
+    def test_allows_single_value_custom_replacements_for_e_jo_ju_ja(self):
+        assert translate("бе", custom_replacements=[("е", ["e"])]) == "be"
+        assert translate("(е)", custom_replacements=[("е", ["e"])]) == "(e)"
+        assert translate("/ё", custom_replacements=[("ё", ["o"])]) == "/o"
+        assert translate("е", custom_replacements=[("е", ["e"])]) == "e"
