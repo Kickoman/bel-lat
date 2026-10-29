@@ -72,7 +72,7 @@ def _process_special_case(char, next_char, prev_char, style, replacement):
             else:
                 index = 1
     elif lower in ("е", "ё", "ю", "я"):
-        if prev_lower in ("а", "і", "о", "у", "ы", "ў", "э", "ь", "’", "‘") or prev_char == "":
+        if prev_lower in ("а", "і", "о", "у", "ы", "ў", "э", "ь", "’", "‘") or prev_char == "" or not prev_char.isalpha():
             index = 1
         elif prev_lower == "л" and style == "lacinka":
             index = 2
@@ -130,8 +130,8 @@ def translate(text, style="lacinka", custom_replacements=None):
                 result_for_word.append(char)
                 continue
 
-            next_char = word[i + 1] if i + 1 < len(word) and word[i + 1].lower() in replacements else ""
-            prev_char = word[i - 1] if i > 0 and word[i - 1].lower() in replacements else ""
+            next_char = word[i + 1] if i + 1 < len(word) else ""
+            prev_char = word[i - 1] if i > 0 else ""
 
             result_for_word.append(_process_char(char, next_char, prev_char, style, replacement))
 
